@@ -24,10 +24,10 @@ if STORAGE_TYPE == 'aws':
     try:
         from aws_storage_service import AWSS3Storage
         storage = AWSS3Storage(
-            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
-            region_name=os.environ.get('AWS_REGION', 'us-east-1'),
-            bucket_name=os.environ.get('AWS_BUCKET_NAME', 'photos')
+            AWS_ACCESS_KEY_ID = os.getenv('S3_ACCESS_KEY_ID')
+            AWS_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
+            AWS_S3_BUCKET = os.getenv('S3_BUCKET_NAME')
+            AWS_REGION = os.getenv('S3_REGION', 'us-east-1')
         )
         storage.create_container()
         storage_type_name = "AWS S3 Storage"
