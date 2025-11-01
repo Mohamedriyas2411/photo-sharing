@@ -13,12 +13,29 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
-# Storage configuration - Choose between local or Azure
-STORAGE_TYPE = os.environ.get('STORAGE_TYPE', 'local').lower()  # 'local' or 'azure'
+# Storage configuration - Choose between local, Azure, or AWS
+STORAGE_TYPE = os.environ.get('STORAGE_TYPE', 'local').lower()  # 'local', 'azure', or 'aws'
 
 # Initialize Storage based on configuration
 storage = None
 storage_type_name = "Local Storage"
+
+if STORAGE_TYPE == 'aws':
+    try:
+        from aws_storage_service import AWSS3Storage
+        storage = AWSS3Storage(
+            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
+            region_name=os.environ.get('AWS_REGION', 'us-east-1'),
+            bucket_name=os.environ.get('AWS_BUCKET_NAME', 'photos')
+        )
+        storage.create_container()
+        storage_type_name = "AWS S3 Storage"
+        print("✓ Using AWS S3 Storage")
+    except Exception as e:
+        print(f"⚠ AWS S3 initialization failed: {e}")
+        print("Falling back to Local Storage...")
+        STORAGE_TYPE = 'local'
 
 if STORAGE_TYPE == 'azure':
     try:

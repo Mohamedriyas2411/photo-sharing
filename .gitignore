@@ -53,3 +53,12 @@ uploads/
 *.png
 *.gif
 *.webp
+
+# AWS Elastic Beanstalk
+.elasticbeanstalk/
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# AWS credentials
+.aws/
+credentials

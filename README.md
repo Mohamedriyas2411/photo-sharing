@@ -1,381 +1,248 @@
 # 📸 Photo Sharing Platform
 
-A cloud-based photo sharing platform built with Python Flask and Azure Blob Storage, designed for secure file storage and retrieval. This application demonstrates container creation, file upload/download operations, and seamless cloud integration.
+A cloud-based photo sharing platform built with Python Flask and AWS S3, designed for secure file storage and retrieval. Deploy easily with AWS Amplify!
 
 ## ✨ Features
 
-- **Secure Cloud Storage**: Upload images to Azure Blob Storage
-- **Container Management**: Automatic container creation and configuration
+- **AWS S3 Storage**: Upload images securely to Amazon S3
+- **Easy Deployment**: Deploy in minutes with AWS Amplify
 - **File Operations**: Upload, view, and delete photos
 - **Beautiful UI**: Modern, responsive interface with drag-and-drop support
 - **Image Gallery**: Browse all uploaded photos with preview functionality
 - **File Validation**: Support for PNG, JPG, JPEG, GIF, and WEBP formats
 - **Size Management**: Maximum 16MB file size with automatic validation
-- **Production Ready**: Configured for deployment on Render.com
+- **Auto-Deploy**: Automatic deployments from GitHub
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────────────┐
-│   Browser   │ ───> │ Flask App    │ ───> │ Azure Blob      │
-│  (Client)   │      │ (Web Server) │      │ Storage         │
+│   Browser   │ ───> │ Flask App    │ ───> │   AWS S3        │
+│  (Client)   │      │ (Amplify)    │      │   Bucket        │
 └─────────────┘      └──────────────┘      └─────────────────┘
                            │
                            ├── app.py (Routes & Logic)
-                           ├── storage_service.py (Azure SDK)
+                           ├── aws_storage_service.py (AWS SDK)
                            └── templates/ (HTML UI)
 ```
 
 ## 📋 Prerequisites
 
 - Python 3.11 or higher
-- Azure Storage Account
-- Git (for deployment)
-- Render.com account (for deployment)
+- AWS Account (free tier available)
+- Git and GitHub account
+- Your code pushed to GitHub repository
 
-## 🚀 Local Setup
+## 🚀 AWS Amplify Deployment Guide
 
-### 1. Clone or Navigate to Project Directory
+### Step 1: Create S3 Bucket for Photos
 
-```powershell
-cd "c:\Users\moham\Desktop\photo sharing platform"
-```
+1. Go to [AWS S3 Console](https://s3.console.aws.amazon.com/s3/)
+2. Click **"Create bucket"**
+3. **Bucket name**: Choose a unique name (e.g., `my-photo-app-2025`)
+4. **Region**: Select closest to you (e.g., `us-east-1`)
+5. **Uncheck** "Block all public access" ⚠️
+6. Acknowledge the warning
+7. Click **"Create bucket"**
 
-### 2. Create Virtual Environment
+8. **Set Bucket Policy** (Make images publicly readable):
+   - Click your bucket name
+   - Go to **"Permissions"** tab
+   - Click **"Bucket Policy"**
+   - Paste this (replace `YOUR-BUCKET-NAME`):
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Sid": "PublicReadGetObject",
+         "Effect": "Allow",
+         "Principal": "*",
+         "Action": "s3:GetObject",
+         "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/*"
+       }
+     ]
+   }
+   ```
+   - Click **"Save changes"**
 
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
+### Step 2: Get AWS Credentials
 
-### 3. Install Dependencies
+1. Go to [IAM Console](https://console.aws.amazon.com/iam/)
+2. Click **"Users"** → **"Create user"**
+3. Username: `photo-app-user`
+4. Click **"Next"**
+5. Select **"Attach policies directly"**
+6. Search and check: **"AmazonS3FullAccess"**
+7. Click **"Next"** → **"Create user"**
+8. Click on the new user → **"Security credentials"** tab
+9. Click **"Create access key"**
+10. Select **"Application running outside AWS"**
+11. Click **"Next"** → **"Create access key"**
+12. **⚠️ SAVE THESE** (you won't see them again):
+    - Access key ID
+    - Secret access key
 
-```powershell
-pip install -r requirements.txt
-```
-
-### 4. Configure Environment Variables
-
-Copy `.env.example` to `.env`:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Edit `.env` and add your Azure Storage credentials:
-
-```env
-AZURE_STORAGE_CONNECTION_STRING=your_connection_string_here
-AZURE_CONTAINER_NAME=photos
-SECRET_KEY=your-random-secret-key
-PORT=5000
-```
-
-#### Getting Azure Storage Connection String:
-
-1. Go to [Azure Portal](https://portal.azure.com)
-2. Navigate to your Storage Account (or create one)
-3. Go to **Security + networking** → **Access keys**
-4. Copy **Connection string** from key1 or key2
-
-### 5. Test Storage Service
-
-Run the storage service test:
-
-```powershell
-$env:AZURE_STORAGE_CONNECTION_STRING="your_connection_string"
-python storage_service.py
-```
-
-This will:
-- Create the container if it doesn't exist
-- List all files in the container
-- Verify the connection works
-
-### 6. Run the Application
+### Step 3: Push Your Code to GitHub
 
 ```powershell
-python app.py
+git add .
+git commit -m "Ready for AWS Amplify deployment"
+git push origin main
 ```
 
-Visit: http://localhost:5000
+### Step 4: Deploy to AWS Amplify
+
+1. Go to [AWS Amplify Console](https://console.aws.amazon.com/amplify/)
+2. Click **"New app"** → **"Host web app"**
+3. Choose **"GitHub"** → Click **"Continue"**
+4. Authorize AWS Amplify (if needed)
+5. Select your repository: **"carRentaal"**
+6. Branch: **"main"**
+7. Click **"Next"**
+
+### Step 5: Configure Build Settings
+
+1. App name: `photo-sharing-app`
+2. The build settings will use your `amplify.yml` file
+3. Click **"Advanced settings"**
+4. **Add environment variables**:
+   ```
+   STORAGE_TYPE = aws
+   AWS_ACCESS_KEY_ID = your-access-key-from-step-2
+   AWS_SECRET_ACCESS_KEY = your-secret-key-from-step-2
+   AWS_S3_BUCKET = your-bucket-name-from-step-1
+   AWS_REGION = us-east-1
+   SECRET_KEY = any-random-string-here
+   PORT = 8080
+   ```
+5. Click **"Next"** → **"Save and deploy"**
+
+### Step 6: Wait for Deployment ⏳
+
+- Deployment takes 5-10 minutes
+- Watch the build logs for any errors
+- Once complete, you'll get a URL like:
+  ```
+  https://main.d1a2b3c4d5e6f.amplifyapp.com
+  ```
+
+### Step 7: Test Your App! 🎉
+
+1. Click the Amplify URL
+2. Upload a photo
+3. View it in the gallery
+4. Check your S3 bucket - photos are there!
+
+## 🔄 Automatic Updates
+
+Every time you push to GitHub, Amplify automatically redeploys:
+```powershell
+git add .
+git commit -m "Your changes"
+git push origin main
+```
+
+## 💰 Cost Estimate
+
+**AWS Free Tier includes:**
+- S3: 5GB storage, 20,000 GET requests/month
+- Amplify: 1,000 build minutes/month, 15GB served/month
+
+**Typical cost after free tier:** $0-5/month for small apps
 
 ## 📦 Project Structure
 
 ```
 photo sharing platform/
 ├── app.py                      # Flask application with routes
-├── storage_service.py          # Azure Blob Storage service
+├── aws_storage_service.py      # AWS S3 storage service
+├── local_storage_service.py    # Local storage (for dev)
+├── storage_service.py          # Storage factory
 ├── requirements.txt            # Python dependencies
-├── render.yaml                 # Render deployment configuration
-├── .env.example               # Environment variables template
-├── .gitignore                 # Git ignore rules
-├── README.md                  # This file
+├── amplify.yml                 # AWS Amplify configuration
+├── Procfile                    # Process configuration
+├── .env                        # Environment variables (DO NOT COMMIT!)
+├── .gitignore                  # Git ignore rules
+├── README.md                   # This file
 └── templates/
-    ├── index.html             # Upload page
-    └── gallery.html           # Gallery page
+    ├── index.html              # Upload page
+    └── gallery.html            # Gallery page
 ```
 
-## 🔧 Core Components
+## � Troubleshooting
 
-### 1. Storage Service (`storage_service.py`)
+### Build Fails in Amplify
+- Check build logs in Amplify console
+- Verify `amplify.yml` file is present
+- Check all dependencies in `requirements.txt`
 
-Handles all Azure Blob Storage operations:
+### Images Don't Upload
+- Verify S3 bucket policy allows public read
+- Check AWS credentials in environment variables
+- Ensure AWS region matches your bucket region
 
-- **Container Creation**: `create_container()` - Creates container if not exists
-- **File Upload**: `upload_file(file_stream, filename)` - Uploads files to blob storage
-- **File Retrieval**: `list_files()` - Lists all files with metadata
-- **File Download**: `download_file(filename)` - Downloads file content
-- **File Deletion**: `delete_file(filename)` - Removes files from storage
-- **File Existence**: `file_exists(filename)` - Checks if file exists
+### App Won't Start
+- Check logs in Amplify console under "Logs"
+- Verify `PORT=8080` environment variable
+- Make sure `Procfile` exists with correct content
 
-### 2. Flask Application (`app.py`)
+### "Access Denied" Errors
+- Check IAM user has `AmazonS3FullAccess` permission
+- Verify access keys are correct in environment variables
 
-Web server with the following routes:
+### Images Upload but Don't Display
+- Check S3 bucket policy - must allow public GetObject
+- Verify bucket name in environment variables matches actual bucket
 
-- `GET /` - Upload form
-- `POST /upload` - Handle file upload
-- `GET /gallery` - Display all photos
-- `POST /delete/<filename>` - Delete a photo
-- `GET /health` - Health check endpoint
+## 🔒 Security Best Practices
 
-### 3. Templates
+1. **Never commit `.env` file** - Contains sensitive credentials
+2. **Use Amplify environment variables** - Store secrets securely
+3. **Rotate AWS keys regularly** - Change access keys every 90 days
+4. **Keep S3 bucket properly configured** - Only public read, not write
+5. **Monitor AWS CloudTrail** - Track all API calls
 
-- **index.html**: Upload interface with drag-and-drop support
-- **gallery.html**: Photo gallery with modal preview
+## 📝 Environment Variables Reference
 
-## 🌐 Deployment to Render.com
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `STORAGE_TYPE` | Storage backend | `aws` |
+| `AWS_ACCESS_KEY_ID` | AWS access key | From IAM user |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key | From IAM user |
+| `AWS_S3_BUCKET` | S3 bucket name | `my-photo-app-2025` |
+| `AWS_REGION` | AWS region | `us-east-1` |
+| `SECRET_KEY` | Flask secret | Any random string |
+| `PORT` | Application port | `8080` |
 
-### Step 1: Prepare Git Repository
+## 🧹 Clean Up (To Avoid Charges)
 
-```powershell
-# Initialize git repository
-git init
-git add .
-git commit -m "Initial commit - Photo sharing platform"
-```
+If you want to delete everything:
 
-### Step 2: Push to GitHub
+1. **Delete Amplify App**:
+   - AWS Amplify Console → Your app → App settings → Delete app
 
-```powershell
-# Create repository on GitHub, then:
-git remote add origin https://github.com/yourusername/photo-sharing-platform.git
-git branch -M main
-git push -u origin main
-```
+2. **Delete S3 Bucket**:
+   - S3 Console → Your bucket → Empty → Delete
 
-### Step 3: Deploy on Render
-
-1. Go to [Render Dashboard](https://dashboard.render.com)
-2. Click **New +** → **Web Service**
-3. Connect your GitHub repository
-4. Render will automatically detect `render.yaml`
-5. Configure environment variables:
-   - `AZURE_STORAGE_CONNECTION_STRING`: Your Azure connection string
-   - `AZURE_CONTAINER_NAME`: `photos` (or your preferred name)
-   - `SECRET_KEY`: Auto-generated by Render
-6. Click **Create Web Service**
-
-### Step 4: Verify Deployment
-
-Once deployed, Render will provide a URL like:
-```
-https://your-app-name.onrender.com
-```
-
-Test the endpoints:
-- `/` - Upload page
-- `/gallery` - Gallery
-- `/health` - Health check
-
-## 🧪 Testing
-
-### Test Container Creation
-
-```python
-from storage_service import AzureBlobStorage
-import os
-
-storage = AzureBlobStorage(
-    connection_string=os.environ.get('AZURE_STORAGE_CONNECTION_STRING'),
-    container_name='photos'
-)
-
-# Create container
-storage.create_container()
-print("Container created successfully!")
-```
-
-### Test File Upload
-
-```python
-# Upload a test file
-with open('test_image.jpg', 'rb') as f:
-    url = storage.upload_file(f, 'test_image.jpg')
-    print(f"File uploaded: {url}")
-```
-
-### Test File Retrieval
-
-```python
-# List all files
-files = storage.list_files()
-for file in files:
-    print(f"Name: {file['name']}, Size: {file['size']} bytes")
-```
-
-## 🔒 Security Considerations
-
-1. **Environment Variables**: Never commit `.env` file
-2. **Connection Strings**: Keep Azure credentials secure
-3. **File Validation**: Only allow specific image formats
-4. **File Size Limits**: Maximum 16MB per file
-5. **HTTPS**: Render provides free SSL certificates
-6. **Public Access**: Container is set to 'blob' level (files are public)
-
-## 📊 Storage Operations
-
-### Container Creation
-```python
-storage.create_container()
-```
-- Creates container if it doesn't exist
-- Sets public access level to 'blob'
-- Returns True on success
-
-### File Upload
-```python
-blob_url = storage.upload_file(file_stream, filename)
-```
-- Accepts file stream and filename
-- Automatically detects content type
-- Overwrites existing files
-- Returns blob URL
-
-### File Listing
-```python
-files = storage.list_files()
-```
-Returns list of dictionaries:
-```python
-{
-    'name': 'photo.jpg',
-    'url': 'https://...',
-    'size': 1024,
-    'created': '2025-11-01 10:30:00',
-    'content_type': 'image/jpeg'
-}
-```
-
-### File Deletion
-```python
-storage.delete_file(filename)
-```
-- Deletes file from storage
-- Returns True on success
-- Returns False if file not found
-
-## 🎨 UI Features
-
-- **Drag & Drop**: Drag files directly to upload area
-- **Image Preview**: See images before uploading
-- **Responsive Design**: Works on mobile and desktop
-- **Modal View**: Click images for full-screen preview
-- **File Information**: View size, date, and type
-- **Flash Messages**: Success/error notifications
-
-## 🐛 Troubleshooting
-
-### Connection String Issues
-```
-Error: Azure Storage initialization failed
-```
-**Solution**: Verify your connection string in `.env` file
-
-### Container Access Issues
-```
-Error creating container: AuthenticationFailed
-```
-**Solution**: Check Azure Storage account access keys
-
-### Upload Failures
-```
-Error uploading file: RequestEntityTooLarge
-```
-**Solution**: File exceeds 16MB limit - resize or compress
-
-### Render Deployment Issues
-```
-Build failed: ModuleNotFoundError
-```
-**Solution**: Ensure `requirements.txt` is correct and committed
-
-## 📝 Environment Variables
-
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `AZURE_STORAGE_CONNECTION_STRING` | Azure Storage connection string | Yes | - |
-| `AZURE_CONTAINER_NAME` | Container name for photos | No | photos |
-| `SECRET_KEY` | Flask secret key | No | dev-secret-key |
-| `PORT` | Application port | No | 5000 |
-
-## 🚦 API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Upload page |
-| `/upload` | POST | Upload file |
-| `/gallery` | GET | View gallery |
-| `/delete/<filename>` | POST | Delete file |
-| `/health` | GET | Health check |
-
-## 📈 Future Enhancements
-
-- [ ] User authentication and authorization
-- [ ] Private photo albums
-- [ ] Image resizing and optimization
-- [ ] Thumbnail generation
-- [ ] Photo sharing via links
-- [ ] Download original files
-- [ ] Metadata and EXIF data display
-- [ ] Search and filter functionality
-- [ ] Batch upload support
-- [ ] Photo editing capabilities
-
-## 🤝 Contributing
-
-Feel free to fork this project and submit pull requests for improvements!
-
-## 📄 License
-
-This project is open source and available for educational purposes.
-
-## 👤 Author
-
-Created as a cloud application development project demonstrating:
-- Azure Blob Storage integration
-- Flask web development
-- Cloud deployment with Render
-- Secure file handling
-- Modern UI/UX design
+3. **Delete IAM User**:
+   - IAM Console → Users → photo-app-user → Delete
 
 ## 📚 Resources
 
-- [Azure Blob Storage Documentation](https://docs.microsoft.com/en-us/azure/storage/blobs/)
+- [AWS Amplify Documentation](https://docs.aws.amazon.com/amplify/)
+- [AWS S3 Documentation](https://docs.aws.amazon.com/s3/)
 - [Flask Documentation](https://flask.palletsprojects.com/)
-- [Render Documentation](https://render.com/docs)
-- [Python Azure SDK](https://github.com/Azure/azure-sdk-for-python)
-
-## 🎯 Learning Objectives Achieved
-
-✅ Container creation and configuration in Azure Blob Storage  
-✅ File upload and storage operations  
-✅ File retrieval and listing  
-✅ Integration with web application  
-✅ Secure credential management  
-✅ Cloud deployment on Render.com  
-✅ Production-ready application structure
+- [Boto3 (AWS SDK) Documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
 
 ---
 
-**Ready to deploy?** Follow the deployment steps above and start sharing photos! 📸
+## � You're All Set!
+
+Your photo sharing app is now deployed on AWS with:
+- ✅ Scalable storage on S3
+- ✅ Automatic deployments from GitHub
+- ✅ HTTPS enabled by default
+- ✅ Free tier eligible
+
+**Questions?** Check the troubleshooting section above or AWS documentation.
